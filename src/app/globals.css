@@ -1,0 +1,180 @@
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
+
+/* -------------------------------------------------------------------------
+   AFM LIGHTHOUSE CHURCH — DESIGN TOKENS
+
+   Signature: the sidebar is a fixed, glassmorphic "harbour at night" navy —
+   it never flips with light/dark mode. Only the working canvas (content
+   area) responds to the theme toggle. A single gold beam animates down the
+   active nav item, echoing the lighthouse without ever drawing a lighthouse.
+   ---------------------------------------------------------------------- */
+
+:root {
+  --radius: 12px;
+
+  /* Canvas — light mode */
+  --background: 216 45% 98%;       /* #F7F9FC */
+  --foreground: 215 28% 17%;       /* #1F2937 */
+
+  --card: 0 0% 100%;
+  --card-foreground: 215 28% 17%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 215 28% 17%;
+
+  --primary: 213 73% 26%;          /* #123E73 deep royal blue */
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 216 64% 49%;        /* #2D6ECF royal blue */
+  --secondary-foreground: 0 0% 100%;
+
+  --muted: 216 30% 95%;
+  --muted-foreground: 220 9% 46%;  /* #6B7280 */
+
+  --accent: 216 64% 95%;
+  --accent-foreground: 213 73% 26%;
+
+  --destructive: 0 72% 51%;        /* #DC2626 */
+  --destructive-foreground: 0 0% 100%;
+
+  --success: 142 76% 36%;          /* #16A34A */
+  --warning: 38 92% 50%;           /* #F59E0B */
+  --info: 221 83% 53%;             /* #2563EB */
+
+  --gold: 46 68% 47%;              /* #C9A227 */
+  --gold-foreground: 0 0% 100%;
+
+  --border: 220 13% 91%;           /* #E5E7EB */
+  --input: 220 13% 91%;
+  --ring: 216 64% 49%;
+
+  /* Sidebar — constant across themes */
+  --sidebar-background: 216 55% 10%;
+  --sidebar-foreground: 210 30% 88%;
+  --sidebar-border: 215 40% 20%;
+  --sidebar-accent: 46 68% 47%;
+}
+
+.dark {
+  --background: 220 33% 7%;
+  --foreground: 210 20% 92%;
+
+  --card: 220 28% 10%;
+  --card-foreground: 210 20% 92%;
+
+  --popover: 220 28% 10%;
+  --popover-foreground: 210 20% 92%;
+
+  --primary: 216 64% 55%;
+  --primary-foreground: 220 33% 7%;
+
+  --secondary: 213 55% 24%;
+  --secondary-foreground: 210 20% 92%;
+
+  --muted: 220 20% 15%;
+  --muted-foreground: 216 12% 65%;
+
+  --accent: 220 25% 16%;
+  --accent-foreground: 210 20% 92%;
+
+  --destructive: 0 70% 58%;
+  --destructive-foreground: 220 33% 7%;
+
+  --success: 142 55% 48%;
+  --warning: 38 90% 58%;
+  --info: 221 80% 66%;
+
+  --gold: 46 72% 58%;
+  --gold-foreground: 220 33% 7%;
+
+  --border: 220 20% 18%;
+  --input: 220 20% 18%;
+  --ring: 46 72% 58%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "cv11", "ss01";
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3 {
+    @apply font-heading tracking-tight;
+  }
+
+  h4, h5, h6 {
+    @apply font-subheading tracking-tight;
+  }
+
+  ::selection {
+    background-color: hsl(var(--gold) / 0.28);
+    color: hsl(var(--foreground));
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.25);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.4);
+    background-clip: content-box;
+  }
+
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: linear-gradient(180deg, hsl(var(--sidebar-background) / 0.92), hsl(var(--sidebar-background) / 0.98));
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+  }
+
+  .glass-panel {
+    background: hsl(var(--card) / 0.72);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+  }
+
+  .beam {
+    background: linear-gradient(90deg, hsl(var(--gold)), hsl(var(--gold) / 0.2));
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--muted-foreground) / 0.15) 50%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.8s infinite linear;
+  }
+}
