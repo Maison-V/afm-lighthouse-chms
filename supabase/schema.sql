@@ -34,19 +34,23 @@ as $$
 $$;
 
 -- Users read and update their own profile; approved admins manage everyone.
+drop policy if exists "profiles select own or admin" on public.profiles;
 create policy "profiles select own or admin"
   on public.profiles for select
   using (auth.uid() = id or public.is_admin());
 
+drop policy if exists "profiles insert own" on public.profiles;
 create policy "profiles insert own"
   on public.profiles for insert
   with check (auth.uid() = id);
 
+drop policy if exists "profiles update own or admin" on public.profiles;
 create policy "profiles update own or admin"
   on public.profiles for update
   using (auth.uid() = id or public.is_admin())
   with check (auth.uid() = id or public.is_admin());
 
+drop policy if exists "profiles delete admin" on public.profiles;
 create policy "profiles delete admin"
   on public.profiles for delete
   using (public.is_admin());
@@ -70,19 +74,23 @@ create table if not exists public.announcements (
 
 alter table public.announcements enable row level security;
 
+drop policy if exists "announcements select public" on public.announcements;
 create policy "announcements select public"
   on public.announcements for select
   using (published = true or public.is_admin());
 
+drop policy if exists "announcements insert admin" on public.announcements;
 create policy "announcements insert admin"
   on public.announcements for insert
   with check (public.is_admin());
 
+drop policy if exists "announcements update admin" on public.announcements;
 create policy "announcements update admin"
   on public.announcements for update
   using (public.is_admin())
   with check (public.is_admin());
 
+drop policy if exists "announcements delete admin" on public.announcements;
 create policy "announcements delete admin"
   on public.announcements for delete
   using (public.is_admin());
@@ -166,12 +174,16 @@ create table if not exists public.members (
 
 alter table public.members enable row level security;
 
+drop policy if exists "members select admin" on public.members;
 create policy "members select admin"
   on public.members for select using (public.is_admin());
+drop policy if exists "members insert admin" on public.members;
 create policy "members insert admin"
   on public.members for insert with check (public.is_admin());
+drop policy if exists "members update admin" on public.members;
 create policy "members update admin"
   on public.members for update using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "members delete admin" on public.members;
 create policy "members delete admin"
   on public.members for delete using (public.is_admin());
 
@@ -196,12 +208,16 @@ create table if not exists public.visitors (
 
 alter table public.visitors enable row level security;
 
+drop policy if exists "visitors select admin" on public.visitors;
 create policy "visitors select admin"
   on public.visitors for select using (public.is_admin());
+drop policy if exists "visitors insert admin" on public.visitors;
 create policy "visitors insert admin"
   on public.visitors for insert with check (public.is_admin());
+drop policy if exists "visitors update admin" on public.visitors;
 create policy "visitors update admin"
   on public.visitors for update using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "visitors delete admin" on public.visitors;
 create policy "visitors delete admin"
   on public.visitors for delete using (public.is_admin());
 
@@ -225,12 +241,16 @@ create table if not exists public.events (
 
 alter table public.events enable row level security;
 
+drop policy if exists "events select public" on public.events;
 create policy "events select public"
   on public.events for select using (true);
+drop policy if exists "events insert admin" on public.events;
 create policy "events insert admin"
   on public.events for insert with check (public.is_admin());
+drop policy if exists "events update admin" on public.events;
 create policy "events update admin"
   on public.events for update using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "events delete admin" on public.events;
 create policy "events delete admin"
   on public.events for delete using (public.is_admin());
 
@@ -248,10 +268,13 @@ create table if not exists public.event_registrations (
 
 alter table public.event_registrations enable row level security;
 
+drop policy if exists "event_registrations insert public" on public.event_registrations;
 create policy "event_registrations insert public"
   on public.event_registrations for insert with check (true);
+drop policy if exists "event_registrations select admin" on public.event_registrations;
 create policy "event_registrations select admin"
   on public.event_registrations for select using (public.is_admin());
+drop policy if exists "event_registrations delete admin" on public.event_registrations;
 create policy "event_registrations delete admin"
   on public.event_registrations for delete using (public.is_admin());
 
@@ -274,12 +297,16 @@ create table if not exists public.ministries (
 
 alter table public.ministries enable row level security;
 
+drop policy if exists "ministries select public" on public.ministries;
 create policy "ministries select public"
   on public.ministries for select using (true);
+drop policy if exists "ministries insert admin" on public.ministries;
 create policy "ministries insert admin"
   on public.ministries for insert with check (public.is_admin());
+drop policy if exists "ministries update admin" on public.ministries;
 create policy "ministries update admin"
   on public.ministries for update using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "ministries delete admin" on public.ministries;
 create policy "ministries delete admin"
   on public.ministries for delete using (public.is_admin());
 
@@ -300,12 +327,16 @@ create table if not exists public.attendance (
 
 alter table public.attendance enable row level security;
 
+drop policy if exists "attendance select admin" on public.attendance;
 create policy "attendance select admin"
   on public.attendance for select using (public.is_admin());
+drop policy if exists "attendance insert admin" on public.attendance;
 create policy "attendance insert admin"
   on public.attendance for insert with check (public.is_admin());
+drop policy if exists "attendance update admin" on public.attendance;
 create policy "attendance update admin"
   on public.attendance for update using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "attendance delete admin" on public.attendance;
 create policy "attendance delete admin"
   on public.attendance for delete using (public.is_admin());
 
@@ -324,9 +355,12 @@ create table if not exists public.certificates (
 
 alter table public.certificates enable row level security;
 
+drop policy if exists "certificates select admin" on public.certificates;
 create policy "certificates select admin"
   on public.certificates for select using (public.is_admin());
+drop policy if exists "certificates insert admin" on public.certificates;
 create policy "certificates insert admin"
   on public.certificates for insert with check (public.is_admin());
+drop policy if exists "certificates delete admin" on public.certificates;
 create policy "certificates delete admin"
   on public.certificates for delete using (public.is_admin());
