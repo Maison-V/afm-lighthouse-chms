@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Users, Clock, TrendingUp, CalendarDays } from "lucide-react";
-import { ministries, members } from "@/lib/mock-data";
+import { getMinistryBySlug, getMembers } from "@/lib/data";
 import { initials } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -10,16 +10,19 @@ import { StatCard } from "@/components/shared/stat-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState } from "@/components/shared/empty-state";
 
-export function generateStaticParams() {
-  return ministries.map((m) => ({ slug: m.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export default async function MinistryDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const ministry = ministries.find((m) => m.slug === slug);
+  const ministry = await getMinistryBySlug(slug);
   if (!ministry) notFound();
 
+  const members = await getMembers();
   const ministryMembers = members.filter((m) => m.ministries.includes(ministry.name)).slice(0, 10);
+  const attendanceRate =
+    ministryMembers.length === 0
+      ? 0
+      : Math.round(ministryMembers.reduce((sum, m) => sum + m.attendanceRate, 0) / ministryMembers.length);
 
   return (
     <div className="flex flex-col gap-6">
@@ -35,9 +38,9 @@ export default async function MinistryDetailPage({ params }: { params: Promise<{
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard label="Members" value={ministry.memberCount} icon={<Users />} tone="primary" index={0} />
-        <StatCard label="Leader" value={ministry.leader.replace(/^(Sis\.|Bro\.|Pastor|Elder|Min\.)\s/, "")} icon={<TrendingUp />} tone="gold" index={1} />
-        <StatCard label="Meets" value={ministry.meetingSchedule} icon={<Clock />} tone="info" index={2} />
-        <StatCard label="Attendance" value="82%" icon={<TrendingUp />} tone="success" index={3} />
+        <StatCard label="Leader" value={ministry.leader ? ministry.leader.replace(/^(Sis\.|Bro\.|Pastor|Elder|Min\.)\s/, "") : "TBA"} icon={<TrendingUp />} tone="gold" index={1} />
+        <StatCard label="Meets" value={ministry.meetingSchedule || "TBA"} icon={<Clock />} tone="info" index={2} />
+        <StatCard label="Avg attendance" value={attendanceRate > 0 ? `${attendanceRate}%` : "—"} icon={<TrendingUp />} tone="success" index={3} />
       </div>
 
       <Tabs defaultValue="dashboard">

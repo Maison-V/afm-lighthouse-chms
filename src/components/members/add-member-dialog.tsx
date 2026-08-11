@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -25,20 +26,22 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { ministries } from "@/lib/mock-data";
+import { addMember } from "@/lib/actions";
+import type { Ministry } from "@/lib/types";
 
 const memberSchema = z.object({
   firstName: z.string().min(2, "First name is too short"),
   lastName: z.string().min(2, "Last name is too short"),
   email: z.string().email("Enter a valid email address"),
   phone: z.string().min(7, "Enter a valid phone number"),
-  ministry: z.string().optional(),
 });
 
 type MemberFormValues = z.infer<typeof memberSchema>;
 
-export function AddMemberDialog() {
+export function AddMemberDialog({ ministries }: { ministries: Ministry[] }) {
+  const router = useRouter();
   const [open, setOpen] = React.useState(false);
+  const [ministry, setMinistry] = React.useState<string | undefined>(undefined);
   const {
     register,
     handleSubmit,
@@ -47,10 +50,16 @@ export function AddMemberDialog() {
   } = useForm<MemberFormValues>({ resolver: zodResolver(memberSchema) });
 
   async function onSubmit(values: MemberFormValues) {
-    await new Promise((r) => setTimeout(r, 600));
-    toast.success(`${values.firstName} ${values.lastName} was added to the register`);
-    reset();
-    setOpen(false);
+    try {
+      await addMember({ ...values, ministry });
+      toast.success(`${values.firstName} ${values.lastName} was added to the register`);
+      reset();
+      setMinistry(undefined);
+      setOpen(false);
+      router.refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
+    }
   }
 
   return (
@@ -95,13 +104,18 @@ export function AddMemberDialog() {
 
           <div className="flex flex-col gap-1.5">
             <Label>Ministry (optional)</Label>
-            <Select onValueChange={() => {}}>
+            <Select value={ministry} onValueChange={setMinistry}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a ministry" />
               </SelectTrigger>
               <SelectContent>
+                {ministries.length === 0 && (
+                  <SelectItem value="none" disabled>
+                    Create a ministry first
+                  </SelectItem>
+                )}
                 {ministries.map((m) => (
-                  <SelectItem key={m.id} value={m.id}>
+                  <SelectItem key={m.id} value={m.name}>
                     {m.name}
                   </SelectItem>
                 ))}

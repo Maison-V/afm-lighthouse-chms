@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   type ColumnDef,
   type SortingState,
@@ -14,6 +16,7 @@ import {
 } from "@tanstack/react-table";
 import { ArrowUpDown, ChevronLeft, ChevronRight, MoreHorizontal, Search, Users } from "lucide-react";
 import type { Member } from "@/lib/types";
+import { updateMemberStatus, archiveMember } from "@/lib/actions";
 import { cn, formatDate, initials } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -56,6 +59,54 @@ function SortableHeader({ label, onClick }: { label: string; onClick: () => void
       {label}
       <ArrowUpDown className="h-3 w-3" />
     </button>
+  );
+}
+
+function RowActions({ member }: { member: Member }) {
+  const router = useRouter();
+
+  async function setStatus(status: Member["status"]) {
+    try {
+      await updateMemberStatus(member.id, status);
+      toast.success(`${member.firstName}'s status is now ${status}`);
+      router.refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
+    }
+  }
+
+  async function archive() {
+    try {
+      await archiveMember(member.id);
+      toast.success(`${member.firstName} ${member.lastName} was archived`);
+      router.refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
+    }
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-8 w-8">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem asChild>
+          <Link href={`/members/${member.id}`}>View profile</Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem disabled>Set status</DropdownMenuItem>
+        {(["active", "new", "inactive", "transferred"] as const).map((status) => (
+          <DropdownMenuItem key={status} className="capitalize" onClick={() => setStatus(status)}>
+            → {status}
+          </DropdownMenuItem>
+        ))}
+        <DropdownMenuItem className="text-destructive" onClick={archive}>
+          Archive member
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -126,22 +177,7 @@ const columns: ColumnDef<Member>[] = [
   {
     id: "actions",
     header: "",
-    cell: ({ row }) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem asChild>
-            <Link href={`/members/${row.original.id}`}>View profile</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem>Edit details</DropdownMenuItem>
-          <DropdownMenuItem className="text-destructive">Archive member</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
+    cell: ({ row }) => <RowActions member={row.original} />,
   },
 ];
 

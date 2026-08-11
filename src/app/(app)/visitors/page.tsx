@@ -1,21 +1,24 @@
-import { UserPlus } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
-import { Button } from "@/components/ui/button";
 import { VisitorBoard } from "@/components/visitors/visitor-board";
-import { visitors } from "@/lib/mock-data";
+import { AddVisitorDialog } from "@/components/visitors/add-visitor-dialog";
+import { getVisitors } from "@/lib/data";
 
-export default function VisitorsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function VisitorsPage() {
+  const visitors = await getVisitors();
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         eyebrow="Visitors"
         title="Guests and follow-up"
-        description="Every first-time guest, tracked from their first visit to full integration into the family."
-        actions={
-          <Button className="gap-2">
-            <UserPlus className="h-4 w-4" /> Register visitor
-          </Button>
+        description={
+          visitors.length === 0
+            ? "No visitors on record yet — register your first guest after the next service."
+            : "Every first-time guest, tracked from their first visit to full integration into the family."
         }
+        actions={<AddVisitorDialog />}
       />
       <VisitorBoard data={visitors} />
     </div>

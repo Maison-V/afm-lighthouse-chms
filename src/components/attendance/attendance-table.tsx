@@ -1,11 +1,30 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { attendance } from "@/lib/mock-data";
+import { Button } from "@/components/ui/button";
+import type { AttendanceRecord } from "@/lib/types";
+import { deleteAttendance } from "@/lib/actions";
 import { formatDate } from "@/lib/utils";
 
-export function AttendanceTable() {
-  const rows = [...attendance].sort((a, b) => (a.date < b.date ? 1 : -1));
+export function AttendanceTable({ data }: { data: AttendanceRecord[] }) {
+  const router = useRouter();
+  const rows = [...data].sort((a, b) => (a.date < b.date ? 1 : -1));
+
+  async function remove(id: string) {
+    if (!confirm("Delete this attendance record?")) return;
+    try {
+      await deleteAttendance(id);
+      toast.success("Record deleted");
+      router.refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
+    }
+  }
 
   return (
     <Card>
@@ -24,6 +43,7 @@ export function AttendanceTable() {
               <TableHead className="text-right">Children</TableHead>
               <TableHead className="text-right">Visitors</TableHead>
               <TableHead className="text-right">Total</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -39,6 +59,11 @@ export function AttendanceTable() {
                   <Badge variant="default" className="font-semibold">
                     {a.total}
                   </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => remove(a.id)}>
+                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}

@@ -132,3 +132,201 @@ create trigger on_auth_user_created
 --
 -- From then on, new admin registrations appear in Settings > Admin Approvals.
 -- ----------------------------------------------------------------------------
+
+-- ============================================================================
+-- Church data — members, visitors, events, ministries, attendance, certificates
+-- All admin-managed records. Public site can only read events, ministries and
+-- announcements; anyone can submit an event registration.
+-- ============================================================================
+
+-- ----------------------------------------------------------------------------
+-- members — the church roster (admin-managed; NOT linked to auth accounts)
+-- ----------------------------------------------------------------------------
+create table if not exists public.members (
+  id uuid primary key default gen_random_uuid(),
+  first_name text not null,
+  last_name text not null,
+  email text,
+  phone text,
+  status text not null default 'new' check (status in ('active', 'new', 'inactive', 'transferred')),
+  joined_at date not null default current_date,
+  birthday text, -- MM-DD
+  address text,
+  ministries text[] not null default '{}',
+  volunteer_status text not null default 'none' check (volunteer_status in ('volunteer', 'leader', 'none')),
+  family jsonb not null default '[]',
+  children jsonb not null default '[]',
+  attendance_rate int not null default 0,
+  notes jsonb not null default '[]',
+  documents jsonb not null default '[]',
+  timeline jsonb not null default '[]',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.members enable row level security;
+
+create policy "members select admin"
+  on public.members for select using (public.is_admin());
+create policy "members insert admin"
+  on public.members for insert with check (public.is_admin());
+create policy "members update admin"
+  on public.members for update using (public.is_admin()) with check (public.is_admin());
+create policy "members delete admin"
+  on public.members for delete using (public.is_admin());
+
+-- ----------------------------------------------------------------------------
+-- visitors — first-time guests tracked through follow-up
+-- ----------------------------------------------------------------------------
+create table if not exists public.visitors (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  email text,
+  phone text,
+  first_visit date not null default current_date,
+  source text,
+  assigned_to text,
+  follow_up_status text not null default 'new' check (follow_up_status in ('new', 'contacted', 'visited', 'integrated', 'lost')),
+  visits int not null default 1,
+  prayer_request text,
+  notes text not null default '',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.visitors enable row level security;
+
+create policy "visitors select admin"
+  on public.visitors for select using (public.is_admin());
+create policy "visitors insert admin"
+  on public.visitors for insert with check (public.is_admin());
+create policy "visitors update admin"
+  on public.visitors for update using (public.is_admin()) with check (public.is_admin());
+create policy "visitors delete admin"
+  on public.visitors for delete using (public.is_admin());
+
+-- ----------------------------------------------------------------------------
+-- events — the church calendar. Public can read, admins manage.
+-- registered counts come from event_registrations.
+-- ----------------------------------------------------------------------------
+create table if not exists public.events (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  category text not null default 'service' check (category in ('service', 'conference', 'outreach', 'training', 'social')),
+  date text not null, -- YYYY-MM-DD
+  time text not null default '09:00',
+  location text not null default 'Main Auditorium',
+  capacity int not null default 100,
+  check_in_enabled boolean not null default false,
+  description text not null default '',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.events enable row level security;
+
+create policy "events select public"
+  on public.events for select using (true);
+create policy "events insert admin"
+  on public.events for insert with check (public.is_admin());
+create policy "events update admin"
+  on public.events for update using (public.is_admin()) with check (public.is_admin());
+create policy "events delete admin"
+  on public.events for delete using (public.is_admin());
+
+-- ----------------------------------------------------------------------------
+-- event_registrations — anyone can register for a public event
+-- ----------------------------------------------------------------------------
+create table if not exists public.event_registrations (
+  id uuid primary key default gen_random_uuid(),
+  event_id uuid not null references public.events (id) on delete cascade,
+  name text not null,
+  email text,
+  phone text,
+  created_at timestamptz not null default now()
+);
+
+alter table public.event_registrations enable row level security;
+
+create policy "event_registrations insert public"
+  on public.event_registrations for insert with check (true);
+create policy "event_registrations select admin"
+  on public.event_registrations for select using (public.is_admin());
+create policy "event_registrations delete admin"
+  on public.event_registrations for delete using (public.is_admin());
+
+-- ----------------------------------------------------------------------------
+-- ministries — teams and departments shown on the public site
+-- ----------------------------------------------------------------------------
+create table if not exists public.ministries (
+  id uuid primary key default gen_random_uuid(),
+  slug text not null unique,
+  name text not null,
+  description text not null default '',
+  leader text,
+  member_count int not null default 0,
+  color text not null default '#2D6ECF',
+  meeting_schedule text,
+  upcoming_event text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.ministries enable row level security;
+
+create policy "ministries select public"
+  on public.ministries for select using (true);
+create policy "ministries insert admin"
+  on public.ministries for insert with check (public.is_admin());
+create policy "ministries update admin"
+  on public.ministries for update using (public.is_admin()) with check (public.is_admin());
+create policy "ministries delete admin"
+  on public.ministries for delete using (public.is_admin());
+
+-- ----------------------------------------------------------------------------
+-- attendance — per-service head counts
+-- ----------------------------------------------------------------------------
+create table if not exists public.attendance (
+  id uuid primary key default gen_random_uuid(),
+  date text not null, -- YYYY-MM-DD
+  service text not null default 'Sunday Morning Service',
+  men int not null default 0,
+  women int not null default 0,
+  children int not null default 0,
+  visitors int not null default 0,
+  total int not null default 0,
+  created_at timestamptz not null default now()
+);
+
+alter table public.attendance enable row level security;
+
+create policy "attendance select admin"
+  on public.attendance for select using (public.is_admin());
+create policy "attendance insert admin"
+  on public.attendance for insert with check (public.is_admin());
+create policy "attendance update admin"
+  on public.attendance for update using (public.is_admin()) with check (public.is_admin());
+create policy "attendance delete admin"
+  on public.attendance for delete using (public.is_admin());
+
+-- ----------------------------------------------------------------------------
+-- certificates — issued certificate records (PDFs generated from the record)
+-- ----------------------------------------------------------------------------
+create table if not exists public.certificates (
+  id uuid primary key default gen_random_uuid(),
+  type text not null check (type in ('baptism', 'membership', 'marriage', 'dedication', 'confirmation')),
+  recipient text not null,
+  date_issued date not null default current_date,
+  issued_by text,
+  status text not null default 'issued' check (status in ('issued', 'draft')),
+  created_at timestamptz not null default now()
+);
+
+alter table public.certificates enable row level security;
+
+create policy "certificates select admin"
+  on public.certificates for select using (public.is_admin());
+create policy "certificates insert admin"
+  on public.certificates for insert with check (public.is_admin());
+create policy "certificates delete admin"
+  on public.certificates for delete using (public.is_admin());

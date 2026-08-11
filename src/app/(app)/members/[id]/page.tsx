@@ -11,7 +11,8 @@ import {
   StickyNote,
   Users as UsersIcon,
 } from "lucide-react";
-import { members } from "@/lib/mock-data";
+import { getMemberById } from "@/lib/data";
+import { EditMemberDialog } from "@/components/members/edit-member-dialog";
 import { cn, formatDate, initials } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -29,13 +30,11 @@ const statusTone: Record<string, "success" | "muted" | "gold" | "info"> = {
   transferred: "info",
 };
 
-export function generateStaticParams() {
-  return members.map((m) => ({ id: m.id }));
-}
+export const dynamic = "force-dynamic";
 
 export default async function MemberProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const member = members.find((m) => m.id === id);
+  const member = await getMemberById(id);
   if (!member) notFound();
 
   return (
@@ -65,15 +64,15 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
             <div className="flex w-full flex-col gap-3 text-left text-sm">
               <div className="flex items-center gap-2.5 text-muted-foreground">
                 <Mail className="h-4 w-4 shrink-0" />
-                <span className="truncate text-foreground">{member.email}</span>
+                <span className="truncate text-foreground">{member.email || "No email on file"}</span>
               </div>
               <div className="flex items-center gap-2.5 text-muted-foreground">
                 <Phone className="h-4 w-4 shrink-0" />
-                <span className="text-foreground">{member.phone}</span>
+                <span className="text-foreground">{member.phone || "No phone on file"}</span>
               </div>
               <div className="flex items-center gap-2.5 text-muted-foreground">
                 <MapPin className="h-4 w-4 shrink-0" />
-                <span className="text-foreground">{member.address}</span>
+                <span className="text-foreground">{member.address || "No address on file"}</span>
               </div>
               <div className="flex items-center gap-2.5 text-muted-foreground">
                 <CalendarDays className="h-4 w-4 shrink-0" />
@@ -88,6 +87,9 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
             <Separator />
 
             <div className="flex w-full flex-wrap gap-1.5">
+              {member.ministries.length === 0 && (
+                <span className="text-xs text-muted-foreground">No ministries assigned yet</span>
+              )}
               {member.ministries.map((m) => (
                 <Badge key={m} variant="outline" className="font-normal">
                   {m}
@@ -96,10 +98,10 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
             </div>
 
             <div className="flex w-full gap-2">
-              <Button variant="outline" className="flex-1">
-                Edit profile
+              <EditMemberDialog member={member} />
+              <Button asChild className="flex-1">
+                <a href={`mailto:${member.email}`}>Message</a>
               </Button>
-              <Button className="flex-1">Message</Button>
             </div>
           </CardContent>
         </Card>
@@ -122,16 +124,20 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
                   <CardDescription>A history of this member&apos;s journey with the church</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ol className="relative flex flex-col gap-6 border-l border-border pl-6">
-                    {member.timeline.map((event) => (
-                      <li key={event.id} className="relative">
-                        <span className="absolute -left-[27px] h-3 w-3 rounded-full border-2 border-card bg-primary" />
-                        <p className="text-xs font-medium uppercase tracking-wide text-secondary">{formatDate(event.date)}</p>
-                        <p className="mt-1 text-sm font-medium text-foreground">{event.label}</p>
-                        <p className="mt-0.5 text-sm text-muted-foreground">{event.description}</p>
-                      </li>
-                    ))}
-                  </ol>
+                  {member.timeline.length === 0 ? (
+                    <EmptyState icon={CalendarDays} title="No history yet" description="Timeline events will appear here as this member grows with the church." />
+                  ) : (
+                    <ol className="relative flex flex-col gap-6 border-l border-border pl-6">
+                      {member.timeline.map((event) => (
+                        <li key={event.id} className="relative">
+                          <span className="absolute -left-[27px] h-3 w-3 rounded-full border-2 border-card bg-primary" />
+                          <p className="text-xs font-medium uppercase tracking-wide text-secondary">{formatDate(event.date)}</p>
+                          <p className="mt-1 text-sm font-medium text-foreground">{event.label}</p>
+                          <p className="mt-0.5 text-sm text-muted-foreground">{event.description}</p>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>

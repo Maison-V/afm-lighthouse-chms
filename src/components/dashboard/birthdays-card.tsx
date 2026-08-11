@@ -2,17 +2,17 @@ import { Cake } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/shared/empty-state";
-import { dashboardStats } from "@/lib/mock-data";
+import type { Member } from "@/lib/types";
 import { initials } from "@/lib/utils";
 
-export function BirthdaysCard() {
-  const birthdays = dashboardStats.birthdaysThisMonth.slice(0, 5);
+export function BirthdaysCard({ members }: { members: Member[] }) {
+  const birthdays = members.slice(0, 5);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Birthdays this month</CardTitle>
-        <CardDescription>Celebrate the family — {dashboardStats.birthdaysThisMonth.length} this month</CardDescription>
+        <CardDescription>Celebrate the family — {members.length} this month</CardDescription>
       </CardHeader>
       <CardContent>
         {birthdays.length === 0 ? (
@@ -33,7 +33,9 @@ export function BirthdaysCard() {
                     {member.firstName} {member.lastName}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {new Date(`2026-${member.birthday}`).toLocaleDateString("en-ZA", { month: "long", day: "numeric" })}
+                    {member.birthday
+                      ? new Date(`2026-${member.birthday}`).toLocaleDateString("en-ZA", { month: "long", day: "numeric" })
+                      : "Birthday not set"}
                   </p>
                 </div>
                 <Cake className="h-4 w-4 shrink-0 text-gold" strokeWidth={1.75} />

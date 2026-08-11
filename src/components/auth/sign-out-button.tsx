@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 /**
- * Signs the current user out and returns to /login. Safe in mock-data demo
+ * Signs the current user out and returns to /login.
  * mode (when Supabase is not configured) — it just navigates.
  */
 export function SignOutButton({

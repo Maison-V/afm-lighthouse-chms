@@ -89,17 +89,6 @@ export interface ChurchEvent {
   description: string;
 }
 
-export interface Transaction {
-  id: string;
-  date: string;
-  type: "income" | "expense";
-  category: string;
-  description: string;
-  amount: number;
-  method: "cash" | "eft" | "card" | "online";
-  ministry?: string;
-}
-
 export interface Certificate {
   id: string;
   type: "baptism" | "membership" | "marriage" | "dedication" | "confirmation";

@@ -1,6 +1,8 @@
-import { EventsAdminView } from "@/components/events/events-admin-view";
-import { EventsPublicView } from "@/components/events/events-public-view";
+import EventsAdminView from "@/components/events/events-admin-view";
+import EventsPublicView from "@/components/events/events-public-view";
 import { getCurrentProfile } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 export default async function EventsPage() {
   const profile = await getCurrentProfile();

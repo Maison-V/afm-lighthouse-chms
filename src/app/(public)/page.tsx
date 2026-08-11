@@ -3,8 +3,7 @@ import { ArrowRight, CalendarDays, Clock, MapPin, Megaphone } from "lucide-react
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { events, ministries } from "@/lib/mock-data";
-import { getPublishedAnnouncements } from "@/lib/data";
+import { getEvents, getMinistries, getPublishedAnnouncements } from "@/lib/data";
 import { formatDate } from "@/lib/utils";
 import { getCurrentProfile } from "@/lib/auth";
 import type { AnnouncementCategory } from "@/lib/types";
@@ -17,15 +16,20 @@ const categoryBadge: Record<AnnouncementCategory, "gold" | "info" | "default" | 
   social: "secondary",
 };
 
-const upcomingEvents = [...events]
-  .sort((a, b) => a.date.localeCompare(b.date))
-  .slice(0, 3);
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [announcements, profile] = await Promise.all([
+  const [announcements, events, ministries, profile] = await Promise.all([
     getPublishedAnnouncements(),
+    getEvents(),
+    getMinistries(),
     getCurrentProfile(),
   ]);
+
+  const upcomingEvents = events
+    .filter((e) => e.date >= new Date().toISOString().slice(0, 10))
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, 3);
 
   return (
     <div>
@@ -118,26 +122,32 @@ export default async function HomePage() {
           </div>
 
           <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-            {upcomingEvents.map((event) => (
-              <Card key={event.id} className="transition-all hover:-translate-y-0.5 hover:shadow-soft-lg">
-                <CardContent className="flex flex-col gap-4 p-5">
-                  <div className="flex items-center justify-between">
-                    <Badge variant="gold" className="capitalize">
-                      {event.category}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">
-                      {formatDate(event.date, { year: undefined })} · {event.time}
-                    </span>
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-subheading text-base font-semibold text-foreground">
-                      {event.title}
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">{event.location}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            {upcomingEvents.length === 0 ? (
+              <div className="col-span-full rounded-card border border-border p-8 text-center text-sm text-muted-foreground">
+                The next gathering is being planned — join us for Sunday service at 09:00.
+              </div>
+            ) : (
+              upcomingEvents.map((event) => (
+                <Card key={event.id} className="transition-all hover:-translate-y-0.5 hover:shadow-soft-lg">
+                  <CardContent className="flex flex-col gap-4 p-5">
+                    <div className="flex items-center justify-between">
+                      <Badge variant="gold" className="capitalize">
+                        {event.category}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDate(event.date, { year: undefined })} · {event.time}
+                      </span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-subheading text-base font-semibold text-foreground">
+                        {event.title}
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">{event.location}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -160,17 +170,23 @@ export default async function HomePage() {
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {ministries.slice(0, 3).map((m) => (
-            <Card key={m.id} className="transition-all hover:-translate-y-0.5 hover:shadow-soft-lg">
-              <CardContent className="flex flex-col gap-3 p-5">
-                <p className="font-subheading text-base font-semibold text-foreground">{m.name}</p>
-                <p className="text-sm text-muted-foreground">{m.description}</p>
-                <div className="flex items-center gap-1.5 border-t border-border pt-3 text-xs text-muted-foreground">
-                  <Clock className="h-3.5 w-3.5" /> {m.meetingSchedule}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          {ministries.length === 0 ? (
+            <div className="col-span-full rounded-card border border-border p-8 text-center text-sm text-muted-foreground">
+              Ministries are being launched — check back soon.
+            </div>
+          ) : (
+            ministries.slice(0, 3).map((m) => (
+              <Card key={m.id} className="transition-all hover:-translate-y-0.5 hover:shadow-soft-lg">
+                <CardContent className="flex flex-col gap-3 p-5">
+                  <p className="font-subheading text-base font-semibold text-foreground">{m.name}</p>
+                  <p className="text-sm text-muted-foreground">{m.description}</p>
+                  <div className="flex items-center gap-1.5 border-t border-border pt-3 text-xs text-muted-foreground">
+                    <Clock className="h-3.5 w-3.5" /> {m.meetingSchedule || "Schedule TBA"}
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
         </div>
       </section>
     </div>

@@ -2,25 +2,25 @@
 
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { attendance } from "@/lib/mock-data";
+import type { AttendanceRecord } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 
-const data = attendance.map((a) => ({
-  date: formatDate(a.date, { month: "short", day: "numeric", year: undefined }),
-  Total: a.total,
-  Visitors: a.visitors,
-}));
+export function AttendanceChart({ data }: { data: AttendanceRecord[] }) {
+  const chartData = data.map((a) => ({
+    date: formatDate(a.date, { month: "short", day: "numeric", year: undefined }),
+    Total: a.total,
+    Visitors: a.visitors,
+  }));
 
-export function AttendanceChart() {
   return (
     <Card className="col-span-1 lg:col-span-2">
       <CardHeader>
         <CardTitle>Attendance trend</CardTitle>
-        <CardDescription>Total service attendance over the last {attendance.length} gatherings</CardDescription>
+        <CardDescription>Total service attendance over the last {data.length} gatherings</CardDescription>
       </CardHeader>
       <CardContent className="h-72 pl-0">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 4, right: 16, left: -12, bottom: 0 }}>
+          <AreaChart data={chartData} margin={{ top: 4, right: 16, left: -12, bottom: 0 }}>
             <defs>
               <linearGradient id="totalFill" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#123E73" stopOpacity={0.35} />
