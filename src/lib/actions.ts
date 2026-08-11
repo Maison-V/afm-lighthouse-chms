@@ -352,3 +352,182 @@ export async function deleteCertificate(certificateId: string) {
   if (error) throw new Error(error.message);
   revalidatePath("/certificates");
 }
+
+// ---------------------------------------------------------------------------
+// Account & settings
+// ---------------------------------------------------------------------------
+
+async function requireUser() {
+  if (!isSupabaseConfigured()) throw new Error("Supabase is not configured yet.");
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("You must be signed in to do this.");
+  return { supabase, userId: user.id, email: user.email ?? "" };
+}
+
+export async function updateOwnProfile(input: { fullName: string; email?: string; password?: string }) {
+  const { supabase, userId, email: currentEmail } = await requireUser();
+
+  const fullName = input.fullName.trim();
+  if (!fullName) throw new Error("Your name cannot be empty.");
+
+  const update: Record<string, string> = { full_name: fullName };
+  const email = input.email?.trim();
+  if (email && email !== currentEmail) {
+    update.email = email;
+  }
+  if (input.password && input.password.length >= 6) {
+    const { error: pwError } = await supabase.auth.updateUser({ password: input.password });
+    if (pwError) throw new Error(pwError.message);
+  }
+
+  const { error } = await supabase.from("profiles").update(update).eq("id", userId);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/profile");
+  revalidatePath("/dashboard");
+}
+
+export async function saveChurchDetails(input: {
+  churchName: string;
+  denomination: string;
+  address: string;
+  phone: string;
+  email: string;
+  seniorPastor: string;
+}) {
+  const supabase = await requireAdmin();
+  const { error } = await supabase
+    .from("church_settings")
+    .update({
+      church_name: input.churchName.trim() || "AFM Lighthouse Church Vryburg",
+      denomination: input.denomination.trim(),
+      address: input.address.trim(),
+      phone: input.phone.trim(),
+      email: input.email.trim(),
+      senior_pastor: input.seniorPastor.trim(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", 1);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/settings");
+  revalidatePath("/");
+}
+
+export async function uploadChurchLogo(formData: FormData) {
+  const supabase = await requireAdmin();
+
+  const file = formData.get("logo") as File | null;
+  if (!file || file.size === 0) throw new Error("Choose a logo image first.");
+  if (!file.type.startsWith("image/")) throw new Error("The logo must be an image file.");
+  if (file.size > 2_000_000) throw new Error("The logo must be under 2 MB.");
+
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const dataUrl = `data:${file.type};base64,${buffer.toString("base64")}`;
+
+  const { error } = await supabase
+    .from("church_settings")
+    .update({ logo_url: dataUrl, updated_at: new Date().toISOString() })
+    .eq("id", 1);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/settings");
+  revalidatePath("/");
+}
+
+export async function saveBrandColors(colors: { primary: string; secondary: string; gold: string }) {
+  const supabase = await requireAdmin();
+  const { error } = await supabase
+    .from("church_settings")
+    .update({
+      brand_colors: {
+        primary: colors.primary.toUpperCase(),
+        secondary: colors.secondary.toUpperCase(),
+        gold: colors.gold.toUpperCase(),
+      },
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", 1);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/settings");
+  revalidatePath("/dashboard");
+  revalidatePath("/");
+}
+
+export async function updateNotificationPrefs(prefs: Record<string, boolean>) {
+  const { supabase, userId } = await requireUser();
+  const { error } = await supabase.from("user_settings").upsert(
+    { user_id: userId, notifications: prefs, updated_at: new Date().toISOString() },
+    { onConflict: "user_id" }
+  );
+  if (error) throw new Error(error.message);
+  revalidatePath("/settings");
+}
+
+function generateInvitePassword() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%";
+  const bytes = crypto.getRandomValues(new Uint8Array(12));
+  let password = "";
+  for (const b of bytes) password += chars[b % chars.length];
+  return password;
+}
+
+export async function inviteUser(input: { email: string; fullName: string; role: "admin" | "member" }) {
+  const supabase = await requireAdmin();
+  const admin = (await import("@/lib/supabase/admin")).createAdminClient();
+
+  const email = input.email.trim().toLowerCase();
+  const password = generateInvitePassword();
+
+  const { data, error } = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { role: input.role, full_name: input.fullName.trim() },
+  });
+  if (error) throw new Error(error.message);
+
+  // role=admin invites land as "pending" via the handle_new_user trigger —
+  // the invited person stays locked out until approved on this page.
+  revalidatePath("/settings");
+  return { password, email: data.user.email ?? email };
+}
+
+export async function setUserRole(userId: string, role: "admin" | "member") {
+  const supabase = await requireAdmin();
+  if (role !== "admin" && role !== "member") throw new Error("Unknown role.");
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (userId === user?.id) throw new Error("You cannot change your own role.");
+
+  const { error } = await supabase.from("profiles").update({ role }).eq("id", userId);
+  if (error) throw new Error(error.message);
+  revalidatePath("/settings");
+}
+
+export async function setUserStatus(userId: string, status: "approved" | "pending" | "rejected") {
+  const supabase = await requireAdmin();
+  const { error } = await supabase.from("profiles").update({ status }).eq("id", userId);
+  if (error) throw new Error(error.message);
+  revalidatePath("/settings");
+}
+
+export async function deleteUser(userId: string) {
+  const supabase = await requireAdmin();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (userId === user?.id) throw new Error("You cannot delete your own account.");
+
+  const admin = (await import("@/lib/supabase/admin")).createAdminClient();
+  const { error } = await admin.auth.admin.deleteUser(userId);
+  if (error) throw new Error(error.message);
+  revalidatePath("/settings");
+}

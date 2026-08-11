@@ -2,12 +2,17 @@ import type {
   Announcement,
   AnnouncementCategory,
   AttendanceRecord,
+  BrandColors,
   Certificate,
   ChurchEvent,
+  ChurchSettings,
   EventCategory,
   Member,
   MembershipStatus,
   Ministry,
+  NotificationPrefs,
+  Profile,
+  UserSettings,
   Visitor,
   FollowUpStatus,
   VolunteerStatus,
@@ -398,4 +403,103 @@ export async function getCertificates(): Promise<Certificate[]> {
     .order("date_issued", { ascending: false });
 
   return (data ?? []).map(mapCertificate);
+}
+
+export async function getChurchSettings(): Promise<ChurchSettings> {
+  const defaults: ChurchSettings = {
+    churchName: "AFM Lighthouse Church Vryburg",
+    denomination: "Apostolic Faith Mission",
+    address: "Church Street, Vryburg, North West",
+    phone: "+27 53 927 0000",
+    email: "office@afmlighthouse.church",
+    seniorPastor: "Pastor Kabelo Sithole",
+    brandColors: { primary: "#123E73", secondary: "#2D6ECF", gold: "#C9A227" },
+  };
+  if (!isSupabaseConfigured()) return defaults;
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("church_settings")
+    .select("church_name, denomination, address, phone, email, senior_pastor, logo_url, brand_colors")
+    .eq("id", 1)
+    .maybeSingle();
+
+  if (!data) return defaults;
+
+  return {
+    churchName: data.church_name || defaults.churchName,
+    denomination: data.denomination || defaults.denomination,
+    address: data.address || defaults.address,
+    phone: data.phone || defaults.phone,
+    email: data.email || defaults.email,
+    seniorPastor: data.senior_pastor || defaults.seniorPastor,
+    logoUrl: data.logo_url || undefined,
+    brandColors: {
+      primary: (data.brand_colors as BrandColors | null)?.primary || defaults.brandColors.primary,
+      secondary: (data.brand_colors as BrandColors | null)?.secondary || defaults.brandColors.secondary,
+      gold: (data.brand_colors as BrandColors | null)?.gold || defaults.brandColors.gold,
+    },
+  };
+}
+
+export async function getUserSettings(userId: string): Promise<UserSettings> {
+  if (!isSupabaseConfigured()) return { notifications: {} };
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("user_settings")
+    .select("notifications")
+    .eq("user_id", userId)
+    .maybeSingle<{ notifications: NotificationPrefs | null }>();
+
+  return { notifications: data?.notifications ?? {} };
+}
+
+export async function getAllProfiles(): Promise<Profile[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, full_name, email, role, status, created_at")
+    .order("created_at", { ascending: false });
+
+  return (data ?? []).map((row: ProfileRow) => ({
+    id: row.id,
+    fullName: row.full_name,
+    email: row.email ?? undefined,
+    role: row.role,
+    status: row.status,
+    createdAt: row.created_at ?? undefined,
+  }));
+}
+
+interface ProfileRow {
+  id: string;
+  full_name: string;
+  email: string | null;
+  role: "admin" | "member";
+  status: "approved" | "pending" | "rejected";
+  created_at: string | null;
+}
+
+export async function getPendingAdmins(): Promise<Profile[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, full_name, email, role, status, created_at")
+    .eq("role", "admin")
+    .eq("status", "pending")
+    .order("created_at", { ascending: true });
+
+  return (data ?? []).map((row: ProfileRow) => ({
+    id: row.id,
+    fullName: row.full_name,
+    email: row.email ?? undefined,
+    role: row.role,
+    status: row.status,
+    createdAt: row.created_at ?? undefined,
+  }));
 }

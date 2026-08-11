@@ -108,3 +108,26 @@ export interface AttendanceRecord {
   visitors: number;
   total: number;
 }
+
+export interface ChurchSettings {
+  churchName: string;
+  denomination: string;
+  address: string;
+  phone: string;
+  email: string;
+  seniorPastor: string;
+  logoUrl?: string;
+  brandColors: BrandColors;
+}
+
+export interface BrandColors {
+  primary: string;
+  secondary: string;
+  gold: string;
+}
+
+export type NotificationPrefs = Record<string, boolean>;
+
+export interface UserSettings {
+  notifications: NotificationPrefs;
+}

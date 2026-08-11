@@ -1,4 +1,4 @@
-import { AppShell } from "@/components/layout/app-shell";
+import AppShell from "@/components/layout/app-shell";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { getCurrentProfile } from "@/lib/auth";

@@ -364,3 +364,51 @@ create policy "certificates insert admin"
 drop policy if exists "certificates delete admin" on public.certificates;
 create policy "certificates delete admin"
   on public.certificates for delete using (public.is_admin());
+-- ----------------------------------------------------------------------------
+-- church_settings — single-row church profile used across certificates,
+-- reports and the public site. Seeded with defaults (SQL editor bypasses RLS).
+-- ----------------------------------------------------------------------------
+create table if not exists public.church_settings (
+  id int primary key default 1 check (id = 1),
+  church_name text not null default 'AFM Lighthouse Church Vryburg',
+  denomination text not null default 'Apostolic Faith Mission',
+  address text not null default 'Church Street, Vryburg, North West',
+  phone text not null default '+27 53 927 0000',
+  email text not null default 'office@afmlighthouse.church',
+  senior_pastor text not null default 'Pastor Kabelo Sithole',
+  logo_url text,
+  brand_colors jsonb not null default '{"primary":"#123E73","secondary":"#2D6ECF","gold":"#C9A227"}',
+  updated_at timestamptz not null default now()
+);
+
+alter table public.church_settings enable row level security;
+
+drop policy if exists "church_settings select public" on public.church_settings;
+create policy "church_settings select public"
+  on public.church_settings for select using (true);
+drop policy if exists "church_settings update admin" on public.church_settings;
+create policy "church_settings update admin"
+  on public.church_settings for update using (public.is_admin()) with check (public.is_admin());
+
+insert into public.church_settings (id) values (1) on conflict (id) do nothing;
+
+-- ----------------------------------------------------------------------------
+-- user_settings — per-user preferences (notification toggles, etc.)
+-- ----------------------------------------------------------------------------
+create table if not exists public.user_settings (
+  user_id uuid primary key references public.profiles (id) on delete cascade,
+  notifications jsonb not null default '{}',
+  updated_at timestamptz not null default now()
+);
+
+alter table public.user_settings enable row level security;
+
+drop policy if exists "user_settings select own" on public.user_settings;
+create policy "user_settings select own"
+  on public.user_settings for select using (auth.uid() = user_id);
+drop policy if exists "user_settings insert own" on public.user_settings;
+create policy "user_settings insert own"
+  on public.user_settings for insert with check (auth.uid() = user_id);
+drop policy if exists "user_settings update own" on public.user_settings;
+create policy "user_settings update own"
+  on public.user_settings for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
