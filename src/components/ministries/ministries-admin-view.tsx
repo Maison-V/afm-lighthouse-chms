@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ministries } from "@/lib/mock-data";
 
-export default function MinistriesPage() {
+export function MinistriesAdminView() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader

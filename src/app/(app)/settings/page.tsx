@@ -11,12 +11,23 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LighthouseMark } from "@/components/shared/lighthouse-mark";
+import { AdminApprovalsCard } from "@/components/settings/admin-approvals-card";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { createClient } from "@/lib/supabase/server";
+import type { Profile, ProfileStatus, UserRole } from "@/lib/types";
 
 const users = [
   { name: "Pastor Kabelo Sithole", email: "admin@afmlighthouse.church", role: "Administrator" },
   { name: "Sis. Naledi Mokoena", email: "naledi@afmlighthouse.church", role: "Ministry Leader" },
   { name: "Bro. Mpho Zulu", email: "mpho@afmlighthouse.church", role: "Usher Coordinator" },
-  { name: "Sis. Palesa Dlamini", email: "palesa@afmlighthouse.church", role: "Finance Officer" },
+  { name: "Sis. Palesa Dlamini", email: "palesa@afmlighthouse.church", role: "Office Administrator" },
+];
+
+// Demo data — real pending admin requests come from the profiles table once
+// Supabase is connected.
+const mockPendingAdmins: Profile[] = [
+  { id: "demo-1", fullName: "Bro. Tshepo Radebe", email: "tshepo@afmlighthouse.church", role: "admin", status: "pending" },
+  { id: "demo-2", fullName: "Sis. Boitumelo Nkosi", email: "boitumelo@afmlighthouse.church", role: "admin", status: "pending" },
 ];
 
 const brandColors = [
@@ -28,7 +39,10 @@ const brandColors = [
   { name: "Danger", hex: "#DC2626" },
 ];
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const configured = isSupabaseConfigured();
+  const pendingAdmins = configured ? await getPendingAdmins() : mockPendingAdmins;
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
@@ -46,6 +60,7 @@ export default function SettingsPage() {
         <TabsList className="flex-wrap">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="users">Users & Roles</TabsTrigger>
+          <TabsTrigger value="approvals">Admin Approvals{pendingAdmins.length > 0 && ` (${pendingAdmins.length})`}</TabsTrigger>
           <TabsTrigger value="branding">Branding</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
         </TabsList>
@@ -151,6 +166,10 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="approvals">
+          <AdminApprovalsCard pending={pendingAdmins} live={configured} />
+        </TabsContent>
+
         <TabsContent value="branding">
           <Card>
             <CardHeader>
@@ -181,7 +200,6 @@ export default function SettingsPage() {
               {[
                 { label: "New visitor registered", desc: "Notify assigned leaders immediately" },
                 { label: "Follow-up reminders", desc: "Remind leaders 48 hours after a visit" },
-                { label: "Giving received", desc: "Notify finance officers of new gifts" },
                 { label: "Event registration milestones", desc: "Notify organisers at 50%, 80%, and 100% capacity" },
                 { label: "Weekly summary email", desc: "Send a Monday morning digest to leadership" },
               ].map((n, i) => (
@@ -199,4 +217,23 @@ export default function SettingsPage() {
       </Tabs>
     </div>
   );
+}
+
+async function getPendingAdmins(): Promise<Profile[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, full_name, email, role, status, created_at")
+    .eq("role", "admin")
+    .eq("status", "pending")
+    .order("created_at", { ascending: true });
+
+  return (data ?? []).map((row: { id: string; full_name: string; email: string | null; role: UserRole; status: ProfileStatus; created_at: string | null }) => ({
+    id: row.id,
+    fullName: row.full_name,
+    email: row.email ?? undefined,
+    role: row.role,
+    status: row.status,
+    createdAt: row.created_at ?? undefined,
+  }));
 }

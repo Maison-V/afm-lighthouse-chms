@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MobileNavContent } from "@/components/layout/mobile-nav";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 import { Badge } from "@/components/ui/badge";
 
 export function Navbar() {
@@ -83,10 +84,6 @@ export function Navbar() {
               <span className="text-sm font-medium">Women&apos;s Conference registration open</span>
               <span className="text-xs text-muted-foreground">142 registered of 220 capacity</span>
             </DropdownMenuItem>
-            <DropdownMenuItem className="flex-col items-start gap-0.5">
-              <span className="text-sm font-medium">Finance report ready</span>
-              <span className="text-xs text-muted-foreground">June statement has been generated</span>
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -108,7 +105,7 @@ export function Navbar() {
             <DropdownMenuItem>My profile</DropdownMenuItem>
             <DropdownMenuItem>Church settings</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">Log out</DropdownMenuItem>
+            <SignOutButton variant="ghost" size="sm" className="w-full justify-start rounded-md text-destructive hover:bg-destructive/10 hover:text-destructive" />
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

@@ -1,4 +1,4 @@
-import { BarChart3, TrendingUp, Users, Wallet, HeartHandshake, UserPlus, Download } from "lucide-react";
+import { BarChart3, TrendingUp, Users, HeartHandshake, UserPlus, Download } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,14 +11,6 @@ const reports = [
     icon: Users,
     tone: "bg-primary/10 text-primary",
     change: "+8.2%",
-    direction: "up" as const,
-  },
-  {
-    title: "Giving trends",
-    description: "Tithes, offerings, and special donations by month.",
-    icon: Wallet,
-    tone: "bg-success/10 text-success",
-    change: "+12.4%",
     direction: "up" as const,
   },
   {
@@ -61,7 +53,7 @@ export default function ReportsPage() {
       <PageHeader
         eyebrow="Reports"
         title="Insights across the house"
-        description="Understand growth, giving, attendance, and ministry health at a glance."
+        description="Understand growth, attendance, and ministry health at a glance."
         actions={
           <Button variant="outline" className="gap-2">
             <Download className="h-4 w-4" /> Export all

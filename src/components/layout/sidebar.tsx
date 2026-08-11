@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronsLeft, LogOut } from "lucide-react";
 import { primaryNav, secondaryNav } from "@/lib/nav";
 import { LighthouseMark } from "@/components/shared/lighthouse-mark";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -121,9 +122,10 @@ export function Sidebar() {
                 active={pathname === item.href || pathname.startsWith(item.href + "/")}
               />
             ))}
-            <button
+            <SignOutButton
+              variant="ghost"
               className={cn(
-                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground/60 transition-colors hover:bg-white/5 hover:text-destructive",
+                "justify-start text-sidebar-foreground/60 hover:bg-white/5 hover:text-destructive",
                 collapsed && "justify-center px-0"
               )}
             >
@@ -131,7 +133,7 @@ export function Sidebar() {
                 <LogOut className="h-[18px] w-[18px]" strokeWidth={1.75} />
               </span>
               {!collapsed && "Log out"}
-            </button>
+            </SignOutButton>
           </div>
         </div>
 

@@ -1,4 +1,5 @@
 import type {
+  Announcement,
   AttendanceRecord,
   Certificate,
   ChurchEvent,
@@ -180,6 +181,49 @@ export const attendance: AttendanceRecord[] = Array.from({ length: 10 }).map((_,
     total: men + women + children + vis,
   };
 });
+
+export const announcements: Announcement[] = [
+  {
+    id: "ann-1",
+    title: "Youth Camp 2026 — registrations open",
+    body: "Sign up at the welcome desk or via the church office. R150 per child, scholarships available — every young person should have their place.",
+    category: "event",
+    startsAt: "2026-08-02",
+    published: true,
+  },
+  {
+    id: "ann-2",
+    title: "New season of Friday Night Worship",
+    body: "Join us every Friday at 18:00 as the Praise and Worship ministry leads an hour of worship and intercession. All are welcome.",
+    category: "service",
+    startsAt: "2026-07-31",
+    published: true,
+  },
+  {
+    id: "ann-3",
+    title: "Church cleaning day — everyone is asked to help",
+    body: "Saturday at 08:00. Gloves, cloths, and elbow grease needed as we prepare the house for Sunday.",
+    category: "notice",
+    startsAt: "2026-07-26",
+    published: true,
+  },
+  {
+    id: "ann-4",
+    title: "Community food drive",
+    body: "Bring non-perishables to the church office during the week. We distribute to families in Vryburg every first Saturday.",
+    category: "outreach",
+    startsAt: "2026-07-20",
+    published: true,
+  },
+  {
+    id: "ann-5",
+    title: "Men's Fellowship breakfast",
+    body: "First Saturday of the month, 07:00 sharp. A time of fellowship, testimony, and discipleship over breakfast.",
+    category: "social",
+    startsAt: "2026-08-01",
+    published: true,
+  },
+];
 
 export const dashboardStats = {
   totalMembers: members.length,
