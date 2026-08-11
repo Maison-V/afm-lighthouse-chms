@@ -412,3 +412,9 @@ create policy "user_settings insert own"
 drop policy if exists "user_settings update own" on public.user_settings;
 create policy "user_settings update own"
   on public.user_settings for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- ----------------------------------------------------------------------------
+-- Google Form import additions — optional columns for the member intake form
+-- ----------------------------------------------------------------------------
+alter table public.members add column if not exists marital_status text;
+alter table public.members add column if not exists whatsapp text;

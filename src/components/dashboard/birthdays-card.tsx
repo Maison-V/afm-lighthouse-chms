@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/shared/empty-state";
 import type { Member } from "@/lib/types";
-import { initials } from "@/lib/utils";
+import { formatBirthday, initials } from "@/lib/utils";
 
 export function BirthdaysCard({ members }: { members: Member[] }) {
   const birthdays = members.slice(0, 5);
@@ -32,11 +32,7 @@ export function BirthdaysCard({ members }: { members: Member[] }) {
                   <p className="truncate text-sm font-medium text-foreground">
                     {member.firstName} {member.lastName}
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    {member.birthday
-                      ? new Date(`2026-${member.birthday}`).toLocaleDateString("en-ZA", { month: "long", day: "numeric" })
-                      : "Birthday not set"}
-                  </p>
+                  <p className="text-xs text-muted-foreground">{formatBirthday(member.birthday)}</p>
                 </div>
                 <Cake className="h-4 w-4 shrink-0 text-gold" strokeWidth={1.75} />
               </div>
