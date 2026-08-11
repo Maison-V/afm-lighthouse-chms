@@ -1,4 +1,4 @@
-import { LighthouseMark } from "@/components/shared/lighthouse-mark";
+import { ChurchLogo } from "@/components/shared/church-logo";
 
 const typeCopy: Record<string, { title: string; body: string }> = {
   baptism: {
@@ -27,10 +27,12 @@ export function CertificatePreview({
   type = "baptism",
   recipient = "Full Name Here",
   date = new Date().toISOString().slice(0, 10),
+  logoUrl,
 }: {
   type?: string;
   recipient?: string;
   date?: string;
+  logoUrl?: string | null;
 }) {
   const copy = typeCopy[type] ?? typeCopy.baptism;
   const formatted = new Date(date).toLocaleDateString("en-ZA", { day: "numeric", month: "long", year: "numeric" });
@@ -40,7 +42,7 @@ export function CertificatePreview({
       <div className="flex h-full flex-col items-center justify-between rounded-[10px] border border-gold/50 px-8 py-8 text-center">
         <div className="flex flex-col items-center gap-2">
           <div className="h-12 w-12">
-            <LighthouseMark />
+            <ChurchLogo logoUrl={logoUrl} />
           </div>
           <p className="font-subheading text-[11px] font-semibold uppercase tracking-[0.2em] text-secondary">
             AFM Lighthouse Church Vryburg

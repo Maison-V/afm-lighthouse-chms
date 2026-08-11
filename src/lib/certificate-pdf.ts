@@ -19,6 +19,7 @@ export async function generateCertificatePdf(cert: {
   recipient: string;
   dateIssued: string;
   issuedBy?: string;
+  logoUrl?: string | null;
 }): Promise<Blob> {
   const doc = await PDFDocument.create();
   const page = doc.addPage([792, 612]); // US Letter, landscape
@@ -41,39 +42,51 @@ export async function generateCertificatePdf(cert: {
   // Inner gold frame
   page.drawRectangle({ x: 52, y: 52, width: width - 104, height: height - 104, borderColor: GOLD, borderWidth: 1.2 });
 
+  // Church logo (uploaded via Settings → General)
+  if (cert.logoUrl) {
+    const image = cert.logoUrl.startsWith("data:image/png")
+      ? await doc.embedPng(cert.logoUrl).catch(() => null)
+      : cert.logoUrl.startsWith("data:image/jpeg") || cert.logoUrl.startsWith("data:image/jpg")
+        ? await doc.embedJpg(cert.logoUrl).catch(() => null)
+        : null;
+    if (image) {
+      page.drawImage(image, { x: cx - 22, y: height - 136, width: 44, height: 44 });
+    }
+  }
+
   // Church name
-  centerText("AFM LIGHTHOUSE CHURCH", height - 120, serifBold, 26, NAVY);
-  centerText("Vryburg", height - 148, serif, 14, MUTED);
+  centerText("AFM LIGHTHOUSE CHURCH", height - 176, serifBold, 26, NAVY);
+  centerText("Vryburg", height - 202, serif, 14, MUTED);
 
   // Gold divider
-  page.drawLine({ start: { x: cx - 160, y: height - 172 }, end: { x: cx + 160, y: height - 172 }, thickness: 1.5, color: GOLD });
+  page.drawLine({ start: { x: cx - 160, y: height - 222 }, end: { x: cx + 160, y: height - 222 }, thickness: 1.5, color: GOLD });
 
   // Certificate type
-  centerText(typeLabel[cert.type], height - 205, serifBold, 20, GOLD);
+  centerText(typeLabel[cert.type], height - 252, serifBold, 20, GOLD);
 
   // Intro
-  centerText("This certifies that", height - 245, serif, 15, MUTED);
+  centerText("This certifies that", height - 292, serif, 15, MUTED);
 
   // Recipient name
-  centerText(cert.recipient.toUpperCase(), height - 295, serifBold, 34, NAVY);
+  centerText(cert.recipient.toUpperCase(), height - 340, serifBold, 34, NAVY);
 
   // Gold divider under name
-  page.drawLine({ start: { x: cx - 140, y: height - 312 }, end: { x: cx + 140, y: height - 312 }, thickness: 1.5, color: GOLD });
+  page.drawLine({ start: { x: cx - 140, y: height - 358 }, end: { x: cx + 140, y: height - 358 }, thickness: 1.5, color: GOLD });
 
   // Body
   centerText(
     "has been received into the fellowship of AFM Lighthouse Church Vryburg,",
-    height - 345,
+    height - 392,
     serif,
     14
   );
   centerText(
     "through the grace of our Lord Jesus Christ, and is commended to the",
-    height - 368,
+    height - 416,
     serif,
     14
   );
-  centerText("prayers and care of the congregation.", height - 391, serif, 14);
+  centerText("prayers and care of the congregation.", height - 440, serif, 14);
 
   // Date
   const formattedDate = new Date(`${cert.dateIssued}T00:00:00`).toLocaleDateString("en-ZA", {
@@ -81,7 +94,7 @@ export async function generateCertificatePdf(cert: {
     month: "long",
     year: "numeric",
   });
-  centerText(`Issued on ${formattedDate}`, height - 440, serifItalic, 13, MUTED);
+  centerText(`Issued on ${formattedDate}`, height - 486, serifItalic, 13, MUTED);
 
   // Signature line
   page.drawLine({

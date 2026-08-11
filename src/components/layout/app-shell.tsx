@@ -58,9 +58,9 @@ export default async function AppShell({ children }: { children: React.ReactNode
     <>
       {brandCss && <style dangerouslySetInnerHTML={{ __html: brandCss }} />}
       <div className="flex min-h-svh bg-background">
-        <Sidebar />
+        <Sidebar logoUrl={settings.logoUrl} />
         <div className="flex min-w-0 flex-1 flex-col">
-          <Navbar profile={profile} notifications={notifications} />
+          <Navbar profile={profile} notifications={notifications} logoUrl={settings.logoUrl} />
           <main className="flex-1 px-4 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-10">
             <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-6">{children}</div>
           </main>

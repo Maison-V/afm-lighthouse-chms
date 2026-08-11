@@ -2,6 +2,7 @@ import AppShell from "@/components/layout/app-shell";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { getCurrentProfile } from "@/lib/auth";
+import { getChurchSettings } from "@/lib/data";
 
 /**
  * Adaptive layout for the community URLs (/ , /events, /ministries).
@@ -9,7 +10,7 @@ import { getCurrentProfile } from "@/lib/auth";
  * full management AppShell around the same URL.
  */
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
-  const profile = await getCurrentProfile();
+  const [profile, settings] = await Promise.all([getCurrentProfile(), getChurchSettings()]);
 
   if (profile?.role === "admin") {
     return <AppShell>{children}</AppShell>;
@@ -17,9 +18,9 @@ export default async function PublicLayout({ children }: { children: React.React
 
   return (
     <div className="flex min-h-svh flex-col bg-background">
-      <SiteHeader profile={profile} />
+      <SiteHeader profile={profile} logoUrl={settings.logoUrl} />
       <main className="flex-1">{children}</main>
-      <SiteFooter />
+      <SiteFooter logoUrl={settings.logoUrl} />
     </div>
   );
 }

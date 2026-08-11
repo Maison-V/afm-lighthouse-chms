@@ -1,13 +1,18 @@
 import Link from "next/link";
 import { Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { LighthouseMark } from "@/components/shared/lighthouse-mark";
+import { ChurchLogo } from "@/components/shared/church-logo";
+import { getChurchSettings } from "@/lib/data";
 
-export default function NotFound() {
+export const dynamic = "force-dynamic";
+
+export default async function NotFound() {
+  const settings = await getChurchSettings();
+
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background px-6 text-center">
       <div className="h-16 w-16">
-        <LighthouseMark />
+        <ChurchLogo logoUrl={settings.logoUrl} />
       </div>
       <div className="flex flex-col items-center gap-2">
         <p className="font-heading text-5xl font-semibold text-primary">404</p>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, CalendarDays, HeartHandshake, BadgeCheck } from "lucide-react";
-import { LighthouseMark } from "@/components/shared/lighthouse-mark";
+import { ChurchLogo } from "@/components/shared/church-logo";
 import { Button } from "@/components/ui/button";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { cn } from "@/lib/utils";
@@ -15,7 +15,13 @@ const links = [
   { label: "Ministries", href: "/ministries", icon: HeartHandshake },
 ];
 
-export function SiteHeader({ profile }: { profile: Profile | null }) {
+export function SiteHeader({
+  profile,
+  logoUrl,
+}: {
+  profile: Profile | null;
+  logoUrl?: string | null;
+}) {
   const pathname = usePathname();
 
   return (
@@ -23,7 +29,7 @@ export function SiteHeader({ profile }: { profile: Profile | null }) {
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-6 px-4 sm:px-6">
         <Link href="/" className="flex shrink-0 items-center gap-3">
           <div className="h-9 w-9">
-            <LighthouseMark />
+            <ChurchLogo logoUrl={logoUrl} />
           </div>
           <div className="hidden sm:block">
             <p className="font-heading text-sm font-semibold leading-tight text-white">AFM Lighthouse</p>

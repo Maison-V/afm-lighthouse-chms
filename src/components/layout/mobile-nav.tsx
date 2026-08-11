@@ -4,18 +4,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { primaryNav, secondaryNav } from "@/lib/nav";
-import { LighthouseMark } from "@/components/shared/lighthouse-mark";
+import { ChurchLogo } from "@/components/shared/church-logo";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { cn } from "@/lib/utils";
 
-export function MobileNavContent() {
+export function MobileNavContent({ logoUrl }: { logoUrl?: string | null }) {
   const pathname = usePathname();
 
   return (
     <div className="flex h-full flex-col bg-sidebar py-5 text-sidebar-foreground">
       <div className="flex items-center gap-3 px-5">
         <div className="h-9 w-9 shrink-0">
-          <LighthouseMark />
+          <ChurchLogo logoUrl={logoUrl} />
         </div>
         <div>
           <p className="font-heading text-sm font-semibold leading-tight text-white">AFM Lighthouse</p>

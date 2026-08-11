@@ -33,9 +33,11 @@ export interface NavbarNotification {
 export function Navbar({
   profile,
   notifications,
+  logoUrl,
 }: {
   profile: Profile | null;
   notifications: NavbarNotification[];
+  logoUrl?: string | null;
 }) {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
@@ -58,7 +60,7 @@ export function Navbar({
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="w-72 p-0">
-          <MobileNavContent />
+          <MobileNavContent logoUrl={logoUrl} />
         </SheetContent>
       </Sheet>
 

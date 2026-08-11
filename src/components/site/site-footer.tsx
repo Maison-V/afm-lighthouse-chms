@@ -1,15 +1,15 @@
 import Link from "next/link";
 import { MapPin, Clock, Mail } from "lucide-react";
-import { LighthouseMark } from "@/components/shared/lighthouse-mark";
+import { ChurchLogo } from "@/components/shared/church-logo";
 
-export function SiteFooter() {
+export function SiteFooter({ logoUrl }: { logoUrl?: string | null }) {
   return (
     <footer className="border-t border-border bg-sidebar">
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-10 px-4 py-12 sm:grid-cols-3 sm:px-6">
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9">
-              <LighthouseMark />
+              <ChurchLogo logoUrl={logoUrl} />
             </div>
             <div>
               <p className="font-heading text-sm font-semibold text-white">AFM Lighthouse</p>

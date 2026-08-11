@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronsLeft, LogOut } from "lucide-react";
 import { primaryNav, secondaryNav } from "@/lib/nav";
-import { LighthouseMark } from "@/components/shared/lighthouse-mark";
+import { ChurchLogo } from "@/components/shared/church-logo";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { cn } from "@/lib/utils";
 import {
@@ -67,7 +67,7 @@ function NavLink({
   return link;
 }
 
-export function Sidebar() {
+export function Sidebar({ logoUrl }: { logoUrl?: string | null }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = React.useState(false);
 
@@ -80,7 +80,7 @@ export function Sidebar() {
       >
         <div className={cn("flex items-center gap-3 px-4", collapsed && "justify-center px-0")}>
           <div className="h-9 w-9 shrink-0">
-            <LighthouseMark />
+            <ChurchLogo logoUrl={logoUrl} />
           </div>
           <AnimatePresence initial={false}>
             {!collapsed && (
