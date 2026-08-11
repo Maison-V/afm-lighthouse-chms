@@ -16,7 +16,7 @@ const categoryTone: Record<string, "default" | "gold" | "success" | "info" | "se
   social: "secondary",
 };
 
-export default function EventsPage() {
+export function EventsAdminView() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader

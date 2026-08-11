@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, CalendarDays, Wallet, MoreHorizontal } from "lucide-react";
+import { LayoutDashboard, Users, CalendarDays, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MobileNavContent } from "@/components/layout/mobile-nav";
@@ -11,7 +11,6 @@ const items = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Members", href: "/members", icon: Users },
   { label: "Events", href: "/events", icon: CalendarDays },
-  { label: "Finance", href: "/finance", icon: Wallet },
 ];
 
 export function BottomNav() {

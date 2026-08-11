@@ -17,6 +17,34 @@ keeping a warm, faith-rooted identity.
 - **Supabase** client stubs (`src/lib/supabase`) — ready to wire up, see below
 - Deploys to **Vercel** with zero configuration
 
+## Authentication & roles
+
+Sign-in is powered by **Supabase Auth** (email + password):
+
+- **Members** register with instant access (`status=approved`) and see the public
+  community site — announcements, events, and ministries (read-only).
+- **Admins** register with `status=pending` and are locked out until an existing
+  approved admin approves them in **Settings → Admin Approvals**.
+- Approved admins see every module of the management system.
+- The public site (`/`, `/events`, `/ministries`) is viewable without an account;
+  the same URLs render the full admin view for approved admins.
+
+The **Finance sector has been removed from the website** (handled privately). The
+finance components (`src/components/finance/*`) and the `Transaction` type are kept
+in the repo for reuse.
+
+### Setting it up
+
+1. Create a project at [supabase.com](https://supabase.com) and copy `.env.example`
+   to `.env.local`, filling in `NEXT_PUBLIC_SUPABASE_URL` and
+   `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+2. Run `supabase/schema.sql` in the Supabase SQL editor (creates `profiles` and
+   `announcements`, RLS policies, and the signup trigger).
+3. Seed the first admin (instructions at the bottom of `supabase/schema.sql`).
+4. Enable email provider in Supabase Auth (email confirmation recommended).
+
+Without env keys the app runs in demo mode with mock data, as before.
+
 ## Getting started
 
 ```bash
@@ -24,7 +52,8 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) — it redirects to `/dashboard`.
+Open [http://localhost:3000](http://localhost:3000) — it shows the public church
+home page.
 
 To build for production:
 
@@ -49,23 +78,29 @@ src/
       ministries/
         [slug]/            # Ministry dashboard (tabs: dashboard, members, schedule, reports)
       events/               # Event grid + detail dialog (registration, QR check-in)
-      finance/              # Income/expense charts, budgets, transactions
       certificates/         # Live certificate generator + history
       attendance/           # Service records + trend chart
       reports/
-      settings/             # General, Users & Roles, Branding, Notifications
+      settings/             # General, Users & Roles, Admin Approvals, Branding, Notifications
+    (auth)/                 # Login, register (member/admin), pending-approval
+    (public)/               # Public site: home (announcements), events, ministries
     layout.tsx              # Root layout: fonts, theme provider, query provider, toaster
     globals.css              # Design tokens (light/dark), base styles, utilities
   components/
     ui/                     # Reusable primitives (button, card, dialog, table, etc.)
     layout/                 # Sidebar, Navbar, MobileNav, BottomNav, Fab, AppShell
     shared/                 # PageHeader, StatCard, EmptyState, LighthouseMark (brand mark)
-    dashboard/ members/ visitors/ ministries/ events/ finance/ certificates/ attendance/
+    site/                   # SiteHeader, SiteFooter (public site chrome)
+    auth/                   # SignOutButton
+    announcements/          # AnnouncementsManager (admin CRUD)
+    dashboard/ members/ visitors/ ministries/ events/ certificates/ attendance/
   lib/
-    types.ts                # Domain types (Member, Visitor, Ministry, Event, Transaction, …)
+    types.ts                # Domain types (Member, Visitor, Ministry, Event, Announcement, …)
+    auth.ts                 # getCurrentProfile() — signed-in user's role/status
+    data.ts                 # Announcements data access (Supabase or mock fallback)
     mock-data.ts             # Realistic mock data powering every module
     nav.ts                   # Single source of truth for sidebar/mobile nav items
-    supabase/                # Browser + server Supabase clients (stubbed, ready to connect)
+    supabase/                # Browser + server Supabase clients (config, client, server)
     utils.ts                 # cn(), formatCurrency(), formatDate(), initials()
 ```
 
@@ -112,8 +147,8 @@ any backend. To connect a real Supabase project:
 ## What's fully built vs. scaffolded
 
 Fully built with realistic mock data, interactions, and empty/loading states: **Dashboard,
-Members (list + profile), Visitors, Ministries (list + detail), Events, Finance, Certificates,
-Attendance, Reports, Settings.**
+Members (list + profile), Visitors, Ministries (list + detail), Events, Certificates,
+Attendance, Reports, Settings, Announcements.**
 
 Interactive patterns demonstrated (reusable across the rest of the app as you connect real data):
 searchable/sortable/filterable TanStack table (Members), kanban-style board (Visitors), tabbed

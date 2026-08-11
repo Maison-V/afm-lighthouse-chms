@@ -1,3 +1,27 @@
+export type UserRole = "admin" | "member";
+export type ProfileStatus = "approved" | "pending" | "rejected";
+
+export interface Profile {
+  id: string;
+  fullName: string;
+  email?: string;
+  role: UserRole;
+  status: ProfileStatus;
+  createdAt?: string;
+}
+
+export type AnnouncementCategory = "service" | "event" | "notice" | "outreach" | "social";
+
+export interface Announcement {
+  id: string;
+  title: string;
+  body: string;
+  category: AnnouncementCategory;
+  startsAt: string;
+  endsAt?: string;
+  published: boolean;
+}
+
 export type MembershipStatus = "active" | "inactive" | "new" | "transferred";
 export type VolunteerStatus = "volunteer" | "leader" | "none";
 
