@@ -138,6 +138,29 @@ export async function getMembers(): Promise<Member[]> {
   return (data ?? []).map(mapMember);
 }
 
+/**
+ * Household stats for a member: how many spouses and children are recorded
+ * with their names filled in. Unnamed/blank entries are ignored.
+ */
+export function memberFamilyStats(member: Member): { spouse: number; children: number } {
+  const spouse = member.family.filter(
+    (f) => f.name.trim() && /spouse|wife|husband/i.test(f.relation)
+  ).length;
+  const children = member.children.filter((c) => c.name.trim()).length;
+  return { spouse, children };
+}
+
+/**
+ * Total church family: every registered member, plus their recorded spouses
+ * and children (only entries whose fields are filled in).
+ */
+export function countChurchFamily(members: Member[]): number {
+  return members.reduce((total, m) => {
+    const { spouse, children } = memberFamilyStats(m);
+    return total + 1 + spouse + children;
+  }, 0);
+}
+
 export async function getMemberById(id: string): Promise<Member | null> {
   if (!isSupabaseConfigured()) return null;
 

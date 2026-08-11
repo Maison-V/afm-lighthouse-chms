@@ -10,7 +10,7 @@ import { BirthdaysCard } from "@/components/dashboard/birthdays-card";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { QuickActions } from "@/components/dashboard/quick-actions";
 import { PrayerRequests } from "@/components/dashboard/prayer-requests";
-import { getMembers, getVisitors, getAttendance, getEvents } from "@/lib/data";
+import { getMembers, getVisitors, getAttendance, getEvents, countChurchFamily, memberFamilyStats } from "@/lib/data";
 import { getCurrentProfile } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -30,6 +30,13 @@ export default async function DashboardPage() {
   const birthdays = members.filter((m) => birthdayMonth(m.birthday) === thisMonth);
   const newVisitors = visitors.filter((v) => v.followUpStatus === "new");
   const upcoming = events.filter((e) => e.date >= today.toISOString().slice(0, 10)).slice(0, 4);
+  const family = members.reduce(
+    (sum, m) => {
+      const { spouse, children } = memberFamilyStats(m);
+      return { spouse: sum.spouse + spouse, children: sum.children + children };
+    },
+    { spouse: 0, children: 0 }
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -47,11 +54,17 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
         <StatCard
           label="Total members"
-          value={members.length}
+          value={countChurchFamily(members)}
           icon={<Users />}
           tone="primary"
           index={0}
-          trend={{ value: `${members.filter((m) => m.status === "active").length} active`, direction: "up" }}
+          trend={{
+            value:
+              family.spouse + family.children > 0
+                ? `${family.spouse + family.children} spouses & children`
+                : `${members.filter((m) => m.status === "active").length} active`,
+            direction: "up",
+          }}
         />
         <StatCard
           label="New visitors"

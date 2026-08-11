@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { ExportAllButton } from "@/components/reports/export-all-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getMembers, getVisitors, getAttendance, getEvents, getMinistries, getCertificates } from "@/lib/data";
+import { getMembers, getVisitors, getAttendance, getEvents, getMinistries, getCertificates, countChurchFamily, memberFamilyStats } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +24,13 @@ export default async function ReportsPage() {
   const avgAttendance =
     attendance.length > 0 ? Math.round(attendance.reduce((s, a) => s + a.total, 0) / attendance.length) : 0;
   const volunteers = members.filter((m) => m.volunteerStatus !== "none").length;
+  const family = members.reduce(
+    (sum, m) => {
+      const { spouse, children } = memberFamilyStats(m);
+      return { spouse: sum.spouse + spouse, children: sum.children + children };
+    },
+    { spouse: 0, children: 0 }
+  );
 
   const reports = [
     {
@@ -31,8 +38,8 @@ export default async function ReportsPage() {
       description: "The congregation register — total, active, and new members.",
       icon: Users,
       tone: "bg-primary/10 text-primary",
-      stat: `${members.length} total`,
-      detail: `${activeMembers} active · ${members.filter((m) => m.status === "new").length} new`,
+      stat: `${countChurchFamily(members)} total`,
+      detail: `${members.length} registered · ${activeMembers} active · ${family.spouse + family.children} spouses & children`,
     },
     {
       title: "Attendance trends",
