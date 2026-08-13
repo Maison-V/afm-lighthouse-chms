@@ -4,9 +4,11 @@ import type {
   AttendanceRecord,
   BrandColors,
   Certificate,
+  ChildInfo,
   ChurchEvent,
   ChurchSettings,
   EventCategory,
+  FamilyMember,
   Member,
   MembershipStatus,
   Ministry,
@@ -93,8 +95,8 @@ interface MemberRow {
   address: string | null;
   ministries: string[];
   volunteer_status: VolunteerStatus;
-  family: { name: string; relation: string }[];
-  children: { name: string; age: number }[];
+  family: FamilyMember[];
+  children: ChildInfo[];
   attendance_rate: number;
   notes: { id: string; author: string; date: string; content: string }[];
   documents: { id: string; name: string; type: string; date: string }[];

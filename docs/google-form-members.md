@@ -104,6 +104,7 @@ function submitRow_(row, headers) {
     maritalStatus: cell_(row, headers, ["marital status"]),
     spouseName: cell_(row, headers, ["spouse name"]),
     spouseSurname: cell_(row, headers, ["spouse surname"]),
+    spouseDateOfBirth: dateCell_(row, headers, ["spouse date of birth"], tz),
     spouseCellNumber: cell_(row, headers, ["spouse cell"]),
     spouseWhatsAppNumber: cell_(row, headers, ["spouse whatsapp"]),
     spouseEmailAddress: cell_(row, headers, ["spouse email"]),
@@ -170,7 +171,8 @@ function backfillAllMembers() {
 | Cell Number / WhatsApp | phone / whatsapp |
 | Marital Status | marital_status |
 | Spouse details | family (relation "Spouse") |
-| Child 1–4 Name + DOB | children (with age) |
+| Spouse Date of Birth | family (spouse birthday — shows on dashboard) |
+| Child 1–4 Name + DOB | children (with age + birthday) |
 | Ministry serving in | ministries |
 | Wants to volunteer | volunteer_status = "volunteer" |
 | Date Signed | joined_at |
@@ -178,3 +180,17 @@ function backfillAllMembers() {
 
 Importing members land as **status "new"** so the office can process them.
 Duplicate submissions update the existing member (matched on cell number).
+
+### Spouse & child birthdays on the dashboard
+
+The dashboard shows birthdays for members **and** their spouses and children:
+
+- **Children**: the form already collects "Child 1–4 Name + Date of Birth" — those
+  dates are now stored and shown. No form change needed.
+- **Spouse**: add a **"Spouse Date of Birth"** question to the Google Form (Date
+  response) if it isn't there already, then update the Apps Script in your sheet
+  with the `spouseDateOfBirth` line above.
+
+To backfill birth dates for existing rows (e.g. after adding the spouse question),
+run `backfillAllMembers` again — the upsert matches on cell number and refreshes
+each member's family details.

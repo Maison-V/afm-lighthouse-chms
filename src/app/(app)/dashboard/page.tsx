@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Users, UserPlus, Cake, CalendarDays } from "lucide-react";
-import { birthdayMonth } from "@/lib/utils";
+import { monthBirthdays } from "@/lib/utils";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ export default async function DashboardPage() {
   const today = new Date();
   const dateLabel = today.toLocaleDateString("en-ZA", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   const thisMonth = String(today.getMonth() + 1).padStart(2, "0");
-  const birthdays = members.filter((m) => birthdayMonth(m.birthday) === thisMonth);
+  const birthdays = monthBirthdays(members, thisMonth);
   const newVisitors = visitors.filter((v) => v.followUpStatus === "new");
   const upcoming = events.filter((e) => e.date >= today.toISOString().slice(0, 10)).slice(0, 4);
   const family = members.reduce(
@@ -86,7 +86,7 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <UpcomingEvents events={upcoming} />
-        <BirthdaysCard members={birthdays} />
+        <BirthdaysCard birthdays={birthdays} />
         <PrayerRequests visitors={visitors} />
       </div>
 

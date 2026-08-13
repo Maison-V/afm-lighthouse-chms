@@ -46,6 +46,7 @@ interface FormRow {
   maritalStatus?: string;
   spouseName?: string;
   spouseSurname?: string;
+  spouseDateOfBirth?: string;
   spouseCellNumber?: string;
   spouseWhatsAppNumber?: string;
   spouseEmailAddress?: string;
@@ -75,6 +76,7 @@ function normalizePayload(raw: Record<string, unknown>): FormRow {
     maritalStatus: clean(raw.maritalStatus),
     spouseName: clean(raw.spouseName),
     spouseSurname: clean(raw.spouseSurname),
+    spouseDateOfBirth: toDate(clean(raw.spouseDateOfBirth)),
     spouseCellNumber: clean(raw.spouseCellNumber),
     spouseWhatsAppNumber: clean(raw.spouseWhatsAppNumber),
     spouseEmailAddress: clean(raw.spouseEmailAddress),
@@ -113,6 +115,7 @@ export async function POST(request: Request) {
     family.push({
       name: `${row.spouseName} ${row.spouseSurname ?? ""}`.trim(),
       relation: "Spouse",
+      birthday: row.spouseDateOfBirth || undefined,
       email: row.spouseEmailAddress || undefined,
       phone: row.spouseCellNumber || row.spouseWhatsAppNumber || undefined,
     });
@@ -120,6 +123,7 @@ export async function POST(request: Request) {
   const children = (row.children ?? []).map((c) => ({
     name: c.name,
     age: computeAge(c.dateOfBirth) ?? 0,
+    birthday: c.dateOfBirth || undefined,
   }));
 
   const ministries = row.servingMinistry ? [row.servingMinistry] : [];

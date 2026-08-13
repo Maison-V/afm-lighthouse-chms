@@ -25,6 +25,27 @@ export interface Announcement {
 export type MembershipStatus = "active" | "inactive" | "new" | "transferred";
 export type VolunteerStatus = "volunteer" | "leader" | "none";
 
+export interface FamilyMember {
+  name: string;
+  relation: string;
+  birthday?: string; // YYYY-MM-DD
+}
+
+export interface ChildInfo {
+  name: string;
+  age: number;
+  birthday?: string; // YYYY-MM-DD
+}
+
+export interface BirthdayEntry {
+  id: string;
+  name: string;
+  label: "member" | "spouse" | "child";
+  memberFirstName: string;
+  memberLastName: string;
+  birthday: string; // MM-DD
+}
+
 export interface Member {
   id: string;
   firstName: string;
@@ -38,8 +59,8 @@ export interface Member {
   address: string;
   ministries: string[];
   volunteerStatus: VolunteerStatus;
-  family: { name: string; relation: string }[];
-  children: { name: string; age: number }[];
+  family: FamilyMember[];
+  children: ChildInfo[];
   attendanceRate: number; // 0-100
   notes: { id: string; author: string; date: string; content: string }[];
   documents: { id: string; name: string; type: string; date: string }[];
