@@ -28,11 +28,13 @@ export function CertificatePreview({
   recipient = "Full Name Here",
   date = new Date().toISOString().slice(0, 10),
   logoUrl,
+  seniorPastor = "Pastor Kabelo Sithole",
 }: {
   type?: string;
   recipient?: string;
   date?: string;
   logoUrl?: string | null;
+  seniorPastor?: string;
 }) {
   const copy = typeCopy[type] ?? typeCopy.baptism;
   const formatted = new Date(date).toLocaleDateString("en-ZA", { day: "numeric", month: "long", year: "numeric" });
@@ -58,7 +60,7 @@ export function CertificatePreview({
 
         <div className="flex w-full items-end justify-between text-left">
           <div>
-            <p className="border-t border-foreground/30 pt-1 text-xs text-muted-foreground">Pastor Kabelo Sithole</p>
+            <p className="border-t border-foreground/30 pt-1 text-xs text-muted-foreground">{seniorPastor}</p>
           </div>
           <p className="text-xs text-muted-foreground">{formatted}</p>
         </div>

@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronsLeft, LogOut } from "lucide-react";
+import { ChevronsLeft } from "lucide-react";
 import { primaryNav, secondaryNav } from "@/lib/nav";
 import { ChurchLogo } from "@/components/shared/church-logo";
 import { SignOutButton } from "@/components/auth/sign-out-button";
@@ -129,9 +129,6 @@ export function Sidebar({ logoUrl }: { logoUrl?: string | null }) {
                 collapsed && "justify-center px-0"
               )}
             >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
-                <LogOut className="h-[18px] w-[18px]" strokeWidth={1.75} />
-              </span>
               {!collapsed && "Log out"}
             </SignOutButton>
           </div>

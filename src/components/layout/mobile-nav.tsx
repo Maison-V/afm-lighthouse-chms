@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut } from "lucide-react";
 import { primaryNav, secondaryNav } from "@/lib/nav";
 import { ChurchLogo } from "@/components/shared/church-logo";
 import { SignOutButton } from "@/components/auth/sign-out-button";
@@ -65,7 +64,6 @@ export function MobileNavContent({ logoUrl }: { logoUrl?: string | null }) {
           variant="ghost"
           className="justify-start text-sidebar-foreground/60 hover:bg-white/5 hover:text-destructive"
         >
-          <LogOut className="h-[18px] w-[18px]" strokeWidth={1.75} />
           Log out
         </SignOutButton>
       </div>

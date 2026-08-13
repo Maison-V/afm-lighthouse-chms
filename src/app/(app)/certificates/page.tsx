@@ -15,7 +15,7 @@ export default async function CertificatesPage() {
         title="Generate and issue"
         description="Create premium, print-ready certificates for baptism, membership, marriage, dedication, and confirmation."
       />
-      <CertificateGenerator logoUrl={settings.logoUrl} />
+      <CertificateGenerator logoUrl={settings.logoUrl} seniorPastor={settings.seniorPastor} />
       <CertificatesHistory certificates={certificates} />
     </div>
   );

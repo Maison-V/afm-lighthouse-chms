@@ -57,7 +57,7 @@ Your sheet already has old responses. Run them through the API once:
 
 ## Apps Script code
 
-```javascript
+'''javascript
 /** @OnlyCurrentDoc */
 var ENDPOINT = "https://afm-lighthouse-chms.vercel.app/api/members/from-form";
 

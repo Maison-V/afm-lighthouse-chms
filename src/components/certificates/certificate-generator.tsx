@@ -28,7 +28,7 @@ const types: { value: Certificate["type"]; label: string }[] = [
   { value: "confirmation", label: "Confirmation" },
 ];
 
-export function CertificateGenerator({ logoUrl }: { logoUrl?: string | null }) {
+export function CertificateGenerator({ logoUrl, seniorPastor }: { logoUrl?: string | null; seniorPastor?: string }) {
   const router = useRouter();
   const [type, setType] = React.useState<Certificate["type"]>("baptism");
   const [recipient, setRecipient] = React.useState("");
@@ -42,7 +42,7 @@ export function CertificateGenerator({ logoUrl }: { logoUrl?: string | null }) {
     }
     setBusy(true);
     try {
-      const blob = await generateCertificatePdf({ type, recipient: recipient.trim(), dateIssued: date, logoUrl });
+      const blob = await generateCertificatePdf({ type, recipient: recipient.trim(), dateIssued: date, logoUrl, issuedBy: seniorPastor });
       const url = URL.createObjectURL(blob);
       if (mode === "print") {
         const win = window.open(url, "_blank");
@@ -115,7 +115,7 @@ export function CertificateGenerator({ logoUrl }: { logoUrl?: string | null }) {
       </Card>
 
       <div className="flex flex-col justify-center">
-        <CertificatePreview type={type} recipient={recipient} date={date} logoUrl={logoUrl} />
+        <CertificatePreview type={type} recipient={recipient} date={date} logoUrl={logoUrl} seniorPastor={seniorPastor} />
       </div>
     </div>
   );
